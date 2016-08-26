@@ -39,6 +39,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pru_cfg.h>
+#include <pru_ctrl.h>
+#include <pru_iep.h>
 #include <pru_intc.h>
 #include <rsc_types.h>
 #include <pru_virtqueue.h>

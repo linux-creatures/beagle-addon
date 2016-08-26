@@ -26,11 +26,19 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-#include <stdlib.h>
-#include <stdbool.h>
 #include <stdint.h>
-
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pru_cfg.h>
+#include <pru_ctrl.h>
+#include <pru_iep.h>
+#include <pru_intc.h>
+#include <rsc_types.h>
+#include <pru_virtqueue.h>
+#include <pru_rpmsg.h>
+#include <sys_mailbox.h>
+#include "resource_table_1.h"
 #include "hc-sr04.h"
 
 #define PRU_OCP_RATE_HZ		(200 * 1000 * 1000)
@@ -70,8 +78,8 @@ int hc_sr04_measure_pulse(void)
 	GPIO1_CLEARDATAOUT = 1u << TRIG_BIT;
 
 	/* Enable counter */
-	PRU_CTRL.CYCLE = 0;
-	PRU_CTRL.CONTROL_bit.COUNTER_ENABLE = 1;
+	PRU1_CTRL.CYCLE = 0;
+	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 1;
 
 	/* wait for ECHO to get high */
 	do {
@@ -79,14 +87,14 @@ int hc_sr04_measure_pulse(void)
 		timeout = PRU_CTRL.CYCLE > PRU_OCP_RATE_HZ;
 	} while (!echo && !timeout);
 
-	PRU_CTRL.CONTROL_bit.COUNTER_ENABLE = 0;
+	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 0;
 
 	if (timeout)
 		return -1;
 
 	/* Restart the counter */
-	PRU_CTRL.CYCLE = 0;
-	PRU_CTRL.CONTROL_bit.COUNTER_ENABLE = 1;
+	PRU1_CTRL.CYCLE = 0;
+	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 1;
 
 	/* measure the "high" pulse length */
 	do {
@@ -94,7 +102,7 @@ int hc_sr04_measure_pulse(void)
 		timeout = PRU_CTRL.CYCLE > PRU_OCP_RATE_HZ;
 	} while (echo && !timeout);
 
-	PRU_CTRL.CONTROL_bit.COUNTER_ENABLE = 0;
+	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 0;
 
 	if (timeout)
 		return -1;
