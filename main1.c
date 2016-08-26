@@ -8,34 +8,11 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *
- * 	* Redistributions of source code must retain the above copyright
- * 	  notice, this list of conditions and the following disclaimer.
- *
- * 	* Redistributions in binary form must reproduce the above copyright
- * 	  notice, this list of conditions and the following disclaimer in the
- * 	  documentation and/or other materials provided with the
- * 	  distribution.
- *
- * 	* Neither the name of Texas Instruments Incorporated nor the names of
- * 	  its contributors may be used to endorse or promote products derived
- * 	  from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pru_cfg.h>
@@ -47,8 +24,6 @@
 #include <pru_rpmsg.h>
 #include <sys_mailbox.h>
 #include "resource_table_1.h"
-
-#include "hc-sr04.h"
 
 /* PRU1 is mailbox module user 2 */
 #define MB_USER						2
@@ -93,10 +68,68 @@ volatile register uint32_t __R31;
 #define TRIG_BIT		12
 #define ECHO_BIT		13
 
+
+
+/* A utility function to reverse a string  */
+void reverse(char str[], int length)
+{
+    char temp;
+    int start = 0;
+    int end = length -1;
+    while (start < end)
+    {
+	temp = str[start];
+	str[start] = str[end];
+	str[end] = temp;
+        start++;
+        end--;
+    }
+}
+ 
+// Implementation of itoa()
+char* itoa(int num, char* str, int base)
+{
+    int i = 0;
+    bool isNegative = false;
+ 
+    /* Handle 0 explicitely, otherwise empty string is printed for 0 */
+    if (num == 0)
+    {
+        str[i++] = '0';
+        str[i] = '\0';
+        return str;
+    }
+ 
+    // In standard itoa(), negative numbers are handled only with 
+    // base 10. Otherwise numbers are considered unsigned.
+    if (num < 0 && base == 10)
+    {
+        isNegative = true;
+        num = -num;
+    }
+ 
+    // Process individual digits
+    while (num != 0)
+    {
+        int rem = num % base;
+        str[i++] = (rem > 9)? (rem-10) + 'a' : rem + '0';
+        num = num/base;
+    }
+ 
+    // If number is negative, append '-'
+    if (isNegative)
+        str[i++] = '-';
+ 
+    str[i] = '\0'; // Append string terminator
+ 
+    // Reverse the string
+    reverse(str, i);
+ 
+    return str;
+}
+
 void hc_sr04_init(void)
 {
-        /* Enable OCP access */
-     //PRU_CFG.SYSCFG_bit.STANDBY_INIT = 0;
 
 	/*
 	 * Don't bother with PRU GPIOs. Our timing requirements allow
@@ -117,7 +150,7 @@ int hc_sr04_measure_pulse(void)
 
 	/* Enable counter */
 	PRU1_CTRL.CYCLE = 0;
-//	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 1;
+	PRU1_CTRL.CTRL_bit.CTR_EN = 1;
 
 	/* wait for ECHO to get high */
 	do {
@@ -125,14 +158,14 @@ int hc_sr04_measure_pulse(void)
 		timeout = PRU1_CTRL.CYCLE > PRU_OCP_RATE_HZ;
 	} while (!echo && !timeout);
 
-//	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 0;
+	PRU1_CTRL.CTRL_bit.CTR_EN = 0;
 
 	if (timeout)
 		return -1;
 
 	/* Restart the counter */
 	PRU1_CTRL.CYCLE = 0;
-//	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 1;
+	PRU1_CTRL.CTRL_bit.CTR_EN = 1;
 
 	/* measure the "high" pulse length */
 	do {
@@ -140,7 +173,7 @@ int hc_sr04_measure_pulse(void)
 		timeout = PRU1_CTRL.CYCLE > PRU_OCP_RATE_HZ;
 	} while (echo && !timeout);
 
-//	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 0;
+	PRU1_CTRL.CTRL_bit.CTR_EN = 0;
 
 	if (timeout)
 		return -1;
@@ -193,7 +226,7 @@ static void handle_mailbox_interrupt(struct pru_rpmsg_transport *transport)
 				int d_mm = measure_distance_mm();
 
 				/* there is no room in IRAM for iprintf */
-				sprintf(payload, "%d", d_mm);
+				itoa(d_mm, payload, 10);
 
 				pru_rpmsg_send(transport, dst, src,
 						payload, strlen(payload) + 1);
