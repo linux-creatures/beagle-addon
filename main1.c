@@ -25,20 +25,16 @@
 #include <sys_mailbox.h>
 #include "resource_table_1.h"
 
-/* PRU1 is mailbox module user 2 */
-#define MB_USER						2
-/* Mbox0 - mail_u2_irq (mailbox interrupt for PRU1) is Int Number 59 */
-#define MB_INT_NUMBER				59
 
 /* Host-1 Interrupt sets bit 31 in register R31 */
 #define HOST_INT					0x80000000
 
-/* The mailboxes used for RPMsg are defined in the Linux device tree
- * PRU0 uses mailboxes 2 (From ARM) and 3 (To ARM)
- * PRU1 uses mailboxes 4 (From ARM) and 5 (To ARM)
+/* The PRU-ICSS system events used for RPMsg are defined in the Linux device tree
+ * PRU0 uses system event 16 (To ARM) and 17 (From ARM)
+ * PRU1 uses system event 18 (To ARM) and 19 (From ARM)
  */
-#define MB_TO_ARM_HOST				5
-#define MB_FROM_ARM_HOST			4
+#define TO_ARM_HOST			18
+#define FROM_ARM_HOST			19
 
 #define CHAN_NAME					"rpmsg-pru"
 
