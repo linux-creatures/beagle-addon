@@ -58,7 +58,7 @@
 void hc_sr04_init(void)
 {
         /* Enable OCP access */
-        PRU_CFG.SYSCFG_bit.STANDBY_INIT = 0;
+     //PRU_CFG.SYSCFG_bit.STANDBY_INIT = 0;
 
 	/*
 	 * Don't bother with PRU GPIOs. Our timing requirements allow
@@ -99,7 +99,7 @@ int hc_sr04_measure_pulse(void)
 	/* measure the "high" pulse length */
 	do {
 		echo = !!(GPIO1_DATAIN & (1u << ECHO_BIT));
-		timeout = PRU_CTRL.CYCLE > PRU_OCP_RATE_HZ;
+		timeout = PRU1_CTRL.CYCLE > PRU_OCP_RATE_HZ;
 	} while (echo && !timeout);
 
 	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 0;
