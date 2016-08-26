@@ -30,7 +30,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <pru/io.h>
 
 #include "hc-sr04.h"
 

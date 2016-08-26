@@ -46,8 +46,6 @@
 #include <sys_mailbox.h>
 #include "resource_table_1.h"
 
-#include <pru/io.h>
-
 #include "hc-sr04.h"
 
 /* PRU1 is mailbox module user 2 */
