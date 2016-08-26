@@ -79,6 +79,77 @@
 char payload[RPMSG_BUF_SIZE];
 volatile register uint32_t __R31;
 
+#define PRU_OCP_RATE_HZ		(200 * 1000 * 1000)
+
+#define TRIG_PULSE_US		10
+
+#define GPIO1_BASE		0x4804C000
+
+#define GPIO1_OE		(*(volatile uint32_t *)(GPIO1_BASE + 0x134))
+#define GPIO1_DATAIN		(*(volatile uint32_t *)(GPIO1_BASE + 0x138))
+#define GPIO1_CLEARDATAOUT	(*(volatile uint32_t *)(GPIO1_BASE + 0x190))
+#define GPIO1_SETDATAOUT	(*(volatile uint32_t *)(GPIO1_BASE + 0x194))
+
+#define TRIG_BIT		12
+#define ECHO_BIT		13
+
+void hc_sr04_init(void)
+{
+        /* Enable OCP access */
+     //PRU_CFG.SYSCFG_bit.STANDBY_INIT = 0;
+
+	/*
+	 * Don't bother with PRU GPIOs. Our timing requirements allow
+	 * us to use the "slow" system GPIOs.
+	 */
+	GPIO1_OE &= ~(1u << TRIG_BIT);	/* output */
+	GPIO1_OE |= (1u << ECHO_BIT);	/* input */
+}
+
+int hc_sr04_measure_pulse(void)
+{
+	bool echo, timeout;
+	
+	/* pulse the trigger for 10us */
+	GPIO1_SETDATAOUT = 1u << TRIG_BIT;
+	__delay_cycles(TRIG_PULSE_US * (PRU_OCP_RATE_HZ / 1000000));
+	GPIO1_CLEARDATAOUT = 1u << TRIG_BIT;
+
+	/* Enable counter */
+	PRU1_CTRL.CYCLE = 0;
+//	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 1;
+
+	/* wait for ECHO to get high */
+	do {
+		echo = !!(GPIO1_DATAIN & (1u << ECHO_BIT));
+		timeout = PRU1_CTRL.CYCLE > PRU_OCP_RATE_HZ;
+	} while (!echo && !timeout);
+
+//	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 0;
+
+	if (timeout)
+		return -1;
+
+	/* Restart the counter */
+	PRU1_CTRL.CYCLE = 0;
+//	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 1;
+
+	/* measure the "high" pulse length */
+	do {
+		echo = !!(GPIO1_DATAIN & (1u << ECHO_BIT));
+		timeout = PRU1_CTRL.CYCLE > PRU_OCP_RATE_HZ;
+	} while (echo && !timeout);
+
+//	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 0;
+
+	if (timeout)
+		return -1;
+
+	uint64_t cycles = PRU1_CTRL.CYCLE;
+
+	return cycles / ((uint64_t)PRU_OCP_RATE_HZ / 1000000);
+}
+
 
 static int measure_distance_mm(void)
 {
