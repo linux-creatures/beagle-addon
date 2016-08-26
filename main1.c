@@ -77,6 +77,8 @@
 #define VIRTIO_CONFIG_S_DRIVER_OK	4
 
 char payload[RPMSG_BUF_SIZE];
+volatile register uint32_t __R31;
+
 
 static int measure_distance_mm(void)
 {
@@ -120,7 +122,7 @@ static void handle_mailbox_interrupt(struct pru_rpmsg_transport *transport)
 				int d_mm = measure_distance_mm();
 
 				/* there is no room in IRAM for iprintf */
-				itoa(d_mm, payload, 10);
+				sprintf(payload, "%d", d_mm);
 
 				pru_rpmsg_send(transport, dst, src,
 						payload, strlen(payload) + 1);
@@ -171,7 +173,7 @@ int main(void)
 	while (1) {
 		/* Check bit 31 of register R31 to see
 		 * if the mailbox interrupt has occurred */
-		if (read_r31() & HOST_INT) {
+		if (__R31 & HOST_INT) {
 			handle_mailbox_interrupt(&transport);
 		}
 	}

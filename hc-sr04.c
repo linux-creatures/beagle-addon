@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <pru_cfg.h>
 #include <pru_ctrl.h>
@@ -71,7 +72,7 @@ void hc_sr04_init(void)
 int hc_sr04_measure_pulse(void)
 {
 	bool echo, timeout;
-
+	
 	/* pulse the trigger for 10us */
 	GPIO1_SETDATAOUT = 1u << TRIG_BIT;
 	__delay_cycles(TRIG_PULSE_US * (PRU_OCP_RATE_HZ / 1000000));
@@ -79,22 +80,22 @@ int hc_sr04_measure_pulse(void)
 
 	/* Enable counter */
 	PRU1_CTRL.CYCLE = 0;
-	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 1;
+//	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 1;
 
 	/* wait for ECHO to get high */
 	do {
 		echo = !!(GPIO1_DATAIN & (1u << ECHO_BIT));
-		timeout = PRU_CTRL.CYCLE > PRU_OCP_RATE_HZ;
+		timeout = PRU1_CTRL.CYCLE > PRU_OCP_RATE_HZ;
 	} while (!echo && !timeout);
 
-	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 0;
+//	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 0;
 
 	if (timeout)
 		return -1;
 
 	/* Restart the counter */
 	PRU1_CTRL.CYCLE = 0;
-	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 1;
+//	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 1;
 
 	/* measure the "high" pulse length */
 	do {
@@ -102,12 +103,12 @@ int hc_sr04_measure_pulse(void)
 		timeout = PRU1_CTRL.CYCLE > PRU_OCP_RATE_HZ;
 	} while (echo && !timeout);
 
-	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 0;
+//	PRU1_CTRL.CONTROL_bit.COUNTER_ENABLE = 0;
 
 	if (timeout)
 		return -1;
 
-	uint64_t cycles = PRU_CTRL.CYCLE;
+	uint64_t cycles = PRU1_CTRL.CYCLE;
 
 	return cycles / ((uint64_t)PRU_OCP_RATE_HZ / 1000000);
 }

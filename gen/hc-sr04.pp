@@ -4,6 +4,7 @@ gen/hc-sr04.object: /usr/share/ti/cgt-pru/include/stdio.h
 gen/hc-sr04.object: /usr/share/ti/cgt-pru/include/linkage.h
 gen/hc-sr04.object: /usr/share/ti/cgt-pru/include/stdarg.h
 gen/hc-sr04.object: /usr/share/ti/cgt-pru/include/stdlib.h
+gen/hc-sr04.object: /usr/share/ti/cgt-pru/include/stdbool.h
 gen/hc-sr04.object: /usr/share/ti/cgt-pru/include/string.h
 gen/hc-sr04.object: include/am335x/pru_cfg.h
 gen/hc-sr04.object: include/am335x/pru_ctrl.h
