@@ -61,8 +61,11 @@ volatile register uint32_t __R31;
 #define GPIO1_CLEARDATAOUT	(*(volatile uint32_t *)(GPIO1_BASE + 0x190))
 #define GPIO1_SETDATAOUT	(*(volatile uint32_t *)(GPIO1_BASE + 0x194))
 
-#define TRIG_BIT		12
-#define ECHO_BIT		13
+#define TRIG1_BIT               0
+#define ECHO1_BIT               1
+#define TRIG2_BIT               12
+#define ECHO2_BIT               13
+
 
 
 
