@@ -38,8 +38,8 @@
 
 #define CHAN_NAME					"rpmsg-pru"
 
-#define CHAN_DESC					"Channel 31"
-#define CHAN_PORT					31
+#define CHAN_DESC					"Channel 30"
+#define CHAN_PORT					30
 
 /*
  * Used to make sure the Linux drivers are ready for RPMsg communication
@@ -48,23 +48,18 @@
 #define VIRTIO_CONFIG_S_DRIVER_OK	4
 
 char payload[RPMSG_BUF_SIZE];
+volatile register uint32_t __R30;
 volatile register uint32_t __R31;
 
 #define PRU_OCP_RATE_HZ		(200 * 1000 * 1000)
 
 #define TRIG_PULSE_US		10
 
-#define GPIO1_BASE		0x4804C000
-
-#define GPIO1_OE		(*(volatile uint32_t *)(GPIO1_BASE + 0x134))
-#define GPIO1_DATAIN		(*(volatile uint32_t *)(GPIO1_BASE + 0x138))
-#define GPIO1_CLEARDATAOUT	(*(volatile uint32_t *)(GPIO1_BASE + 0x190))
-#define GPIO1_SETDATAOUT	(*(volatile uint32_t *)(GPIO1_BASE + 0x194))
 
 #define TRIG1_BIT               0
 #define ECHO1_BIT               1
-#define TRIG2_BIT               12
-#define ECHO2_BIT               13
+#define TRIG2_BIT               2
+#define ECHO2_BIT               3
 
 
 
@@ -129,23 +124,17 @@ char* itoa(int num, char* str, int base)
 
 void hc_sr04_init(void)
 {
-
-	/*
-	 * Don't bother with PRU GPIOs. Our timing requirements allow
-	 * us to use the "slow" system GPIOs.
-	 */
-	GPIO1_OE &= ~(1u << TRIG_BIT);	/* output */
-	GPIO1_OE |= (1u << ECHO_BIT);	/* input */
+	__R30 = 0x0000;
 }
 
-int hc_sr04_measure_pulse(void)
+int hc_sr04_measure_pulse(int TRIG_BIT, int ECHO_BIT)
 {
 	bool echo, timeout;
 	
 	/* pulse the trigger for 10us */
-	GPIO1_SETDATAOUT = 1u << TRIG_BIT;
+	__R30 |= 1u << TRIG_BIT;
 	__delay_cycles(TRIG_PULSE_US * (PRU_OCP_RATE_HZ / 1000000));
-	GPIO1_CLEARDATAOUT = 1u << TRIG_BIT;
+	__R30 |= 1u << TRIG_BIT;
 
 	/* Enable counter */
 	PRU1_CTRL.CYCLE = 0;
@@ -153,7 +142,7 @@ int hc_sr04_measure_pulse(void)
 
 	/* wait for ECHO to get high */
 	do {
-		echo = !!(GPIO1_DATAIN & (1u << ECHO_BIT));
+		echo = !!(__R31 & (1u << ECHO_BIT));
 		timeout = PRU1_CTRL.CYCLE > PRU_OCP_RATE_HZ;
 	} while (!echo && !timeout);
 
@@ -168,7 +157,7 @@ int hc_sr04_measure_pulse(void)
 
 	/* measure the "high" pulse length */
 	do {
-		echo = !!(GPIO1_DATAIN & (1u << ECHO_BIT));
+		echo = !!(__R31 & (1u << ECHO_BIT));
 		timeout = PRU1_CTRL.CYCLE > PRU_OCP_RATE_HZ;
 	} while (echo && !timeout);
 
