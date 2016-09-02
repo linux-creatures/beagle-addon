@@ -58,8 +58,8 @@ volatile register uint32_t __R31;
 
 #define TRIG1_BIT               0
 #define ECHO1_BIT               1
-#define TRIG2_BIT               2
-#define ECHO2_BIT               3
+#define TRIG2_BIT               14
+#define ECHO2_BIT               14
 
 
 
@@ -226,12 +226,21 @@ void main(void)
 			while (pru_rpmsg_receive(&transport, &src, &dst, payload, &len) == PRU_RPMSG_SUCCESS) {
 				/* Echo the message back to the same address from which we just received */
 				while(1){
-				int d_mm = measure_distance_mm();
+				int d_mm1 = measure_distance_mm(TRIG1_BIT, ECHO1_BIT);
 				
 				/* there is no room in IRAM for iprintf */
-                itoa(d_mm, payload, 10);
+                itoa(d_mm1, payload, 10);
 
 				pru_rpmsg_send(&transport, dst, src, payload, len);
+
+				char payload[RPMSG_BUF_SIZE];
+				int d_mm2 = measure_distance_mm(TRIG2_BIT, int ECHO2_BIT);
+				
+				/* there is no room in IRAM for iprintf */
+                itoa(d_mm2, payload, 10);
+
+				pru_rpmsg_send(&transport, dst, src, payload, len);
+				char payload[RPMSG_BUF_SIZE];
 			}
 			}
 		}
