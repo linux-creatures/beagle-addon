@@ -134,9 +134,9 @@ int hc_sr04_measure_pulse(int TRIG_BIT, int ECHO_BIT)
 	bool echo, timeout;
 	
 	/* pulse the trigger for 10us */
-	__R30 |= 1u << TRIG_BIT;
+	__R30 = 1u << TRIG_BIT;
 	__delay_cycles(TRIG_PULSE_US * (PRU_OCP_RATE_HZ / 1000000));
-	__R30 |= 1u << TRIG_BIT;
+	__R30 = 0u << TRIG_BIT;
 
 	/* Enable counter */
 	PRU1_CTRL.CYCLE = 0;
@@ -174,9 +174,9 @@ int hc_sr04_measure_pulse(int TRIG_BIT, int ECHO_BIT)
 }
 
 
-static int measure_distance_mm(void)
+static int measure_distance_mm(int TRIG_BIT, int ECHO_BIT)
 {
-	int t_us = hc_sr04_measure_pulse();
+	int t_us = hc_sr04_measure_pulse(TRIG_BIT, ECHO_BIT);
 	int d_mm;
 
 	/*
@@ -225,7 +225,7 @@ void main(void)
 			/* Clear the event status */
 			CT_INTC.SICR_bit.STS_CLR_IDX = FROM_ARM_HOST;
 			/* Receive all available messages, multiple messages can be sent per kick */
-			while (pru_rpmsg_receive(&transport, &src, &dst, payload, &len) == PRU_RPMSG_SUCCESS) {
+			if (pru_rpmsg_receive(&transport, &src, &dst, payload, &len) == PRU_RPMSG_SUCCESS) {
 				/* Echo the message back to the same address from which we just received */
 				while(1){
 				int d_mm1 = measure_distance_mm(TRIG1_BIT, ECHO1_BIT);
@@ -234,15 +234,15 @@ void main(void)
                 itoa(d_mm1, payload, 10);
 
 				pru_rpmsg_send(&transport, dst, src, payload, len);
+				memset(payload,0,strlen(payload));
 
-				char payload[RPMSG_BUF_SIZE];
-				int d_mm2 = measure_distance_mm(TRIG2_BIT, int ECHO2_BIT);
+				int d_mm2 = measure_distance_mm(TRIG2_BIT, ECHO2_BIT);
 				
 				/* there is no room in IRAM for iprintf */
                 itoa(d_mm2, payload, 10);
 
 				pru_rpmsg_send(&transport, dst, src, payload, len);
-				char payload[RPMSG_BUF_SIZE];
+				memset(payload,0,strlen(payload));
 			}
 			}
 		}
