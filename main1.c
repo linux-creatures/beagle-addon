@@ -8,6 +8,8 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+
+ *Firmware for Left and Right HC-SR04 modules
  */
 
 #include <stdint.h>
@@ -56,10 +58,10 @@ volatile register uint32_t __R31;
 #define TRIG_PULSE_US		10
 
 
-#define TRIG1_BIT               0
-#define ECHO1_BIT               1
-#define TRIG2_BIT               14
-#define ECHO2_BIT               14
+#define TRIG1_BIT               2
+#define ECHO1_BIT               3
+#define TRIG2_BIT               0
+#define ECHO2_BIT               1
 
 
 
