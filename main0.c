@@ -58,10 +58,10 @@ volatile register uint32_t __R31;
 #define TRIG_PULSE_US		10
 
 
-#define TRIG1_BIT               3
-#define ECHO1_BIT               5
-#define TRIG2_BIT               2
-#define ECHO2_BIT               0
+#define TRIG3_BIT               3
+#define ECHO3_BIT               5
+#define TRIG4_BIT               2
+#define ECHO4_BIT               0
 
 
 
@@ -249,3 +249,4 @@ void main(void)
 		}
 	}
 }
+

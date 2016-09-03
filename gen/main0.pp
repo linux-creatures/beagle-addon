@@ -16,6 +16,6 @@ gen/main0.object: include/pru_virtqueue.h
 gen/main0.object: include/pru_virtio_ring.h
 gen/main0.object: include/pru_rpmsg.h
 gen/main0.object: include/am335x/sys_mailbox.h
-gen/main0.object: resource_table_1.h
+gen/main0.object: resource_table_0.h
 gen/main0.object: /usr/share/ti/cgt-pru/include/stddef.h
 gen/main0.object: include/pru_virtio_ids.h
