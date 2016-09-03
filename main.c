@@ -62,8 +62,10 @@ volatile register uint32_t __R31;
 #define ECHO1_BIT               3
 #define TRIG2_BIT               0
 #define ECHO2_BIT               1
-
-
+#define TRIG3_BIT               8
+#define ECHO3_BIT               10
+#define TRIG4_BIT               9
+#define ECHO4_BIT               11
 
 
 /* A utility function to reverse a string  */
@@ -228,16 +230,15 @@ void main(void)
 			if (pru_rpmsg_receive(&transport, &src, &dst, payload, &len) == PRU_RPMSG_SUCCESS) {
 				/* Echo the message back to the same address from which we just received */
 				while(1){
-				int d_mm1 = measure_distance_mm(TRIG1_BIT, ECHO1_BIT);
+		/*		int d_mm1 = measure_distance_mm(TRIG1_BIT, ECHO1_BIT);
 				
-				/* there is no room in IRAM for iprintf */
                 itoa(d_mm1, payload, 10);
 
 				pru_rpmsg_send(&transport, dst, src, payload, len);
 				memset(payload,'\n',strlen(payload));
 
-				pru_rpmsg_send(&transport, dst, src, payload, len);
-				int d_mm2 = measure_distance_mm(TRIG2_BIT, ECHO2_BIT);
+				pru_rpmsg_send(&transport, dst, src, payload, len);*/
+				int d_mm2 = measure_distance_mm(TRIG4_BIT, ECHO4_BIT);
 				
                 itoa(d_mm2, payload, 10);
 
