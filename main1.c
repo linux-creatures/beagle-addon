@@ -87,7 +87,7 @@ char* itoa(int num, char* str, int base)
 {
     int i = 0;
     bool isNegative = false;
- 
+  
     /* Handle 0 explicitely, otherwise empty string is printed for 0 */
     if (num == 0)
     {
@@ -234,15 +234,16 @@ void main(void)
                 itoa(d_mm1, payload, 10);
 
 				pru_rpmsg_send(&transport, dst, src, payload, len);
-				memset(payload,0,strlen(payload));
+				memset(payload,'\n',strlen(payload));
 
-				int d_mm2 = measure_distance_mm(TRIG2_BIT, ECHO2_BIT);
+				pru_rpmsg_send(&transport, dst, src, payload, len);
+			/*	int d_mm2 = measure_distance_mm(TRIG2_BIT, ECHO2_BIT);
 				
-				/* there is no room in IRAM for iprintf */
                 itoa(d_mm2, payload, 10);
 
 				pru_rpmsg_send(&transport, dst, src, payload, len);
-				memset(payload,0,strlen(payload));
+				memset(payload,'\n',strlen(payload));
+				pru_rpmsg_send(&transport, dst, src, payload, len);*/
 			}
 			}
 		}
