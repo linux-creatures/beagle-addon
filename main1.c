@@ -237,13 +237,13 @@ void main(void)
 				memset(payload,'\n',strlen(payload));
 
 				pru_rpmsg_send(&transport, dst, src, payload, len);
-			/*	int d_mm2 = measure_distance_mm(TRIG2_BIT, ECHO2_BIT);
+				int d_mm2 = measure_distance_mm(TRIG2_BIT, ECHO2_BIT);
 				
                 itoa(d_mm2, payload, 10);
 
 				pru_rpmsg_send(&transport, dst, src, payload, len);
 				memset(payload,'\n',strlen(payload));
-				pru_rpmsg_send(&transport, dst, src, payload, len);*/
+				pru_rpmsg_send(&transport, dst, src, payload, len);
 			}
 			}
 		}
