@@ -117,6 +117,7 @@ char* itoa(int num, char* str, int base)
     // If number is negative, append '-'
     if (isNegative)
         str[i++] = '-';
+    str[i++]
  
     str[i] = '\0'; // Append string terminator
  
@@ -230,19 +231,31 @@ void main(void)
 			if (pru_rpmsg_receive(&transport, &src, &dst, payload, &len) == PRU_RPMSG_SUCCESS) {
 				/* Echo the message back to the same address from which we just received */
 				while(1){
-		/*		int d_mm1 = measure_distance_mm(TRIG1_BIT, ECHO1_BIT);
-				
+				int d_mm1 = measure_distance_mm(TRIG1_BIT, ECHO1_BIT);				
                 itoa(d_mm1, payload, 10);
-
 				pru_rpmsg_send(&transport, dst, src, payload, len);
+
 				memset(payload,'\n',strlen(payload));
-
-				pru_rpmsg_send(&transport, dst, src, payload, len);*/
-				int d_mm2 = measure_distance_mm(TRIG4_BIT, ECHO4_BIT);
-				
-                itoa(d_mm2, payload, 10);
-
 				pru_rpmsg_send(&transport, dst, src, payload, len);
+
+				int d_mm2 = measure_distance_mm(TRIG2_BIT, ECHO2_BIT);
+                itoa(d_mm2, payload, 10);
+				pru_rpmsg_send(&transport, dst, src, payload, len);
+
+				memset(payload,'\n',strlen(payload));
+				pru_rpmsg_send(&transport, dst, src, payload, len);
+
+				int d_mm3 = measure_distance_mm(TRIG3_BIT, ECHO3_BIT);
+                itoa(d_mm3, payload, 10);
+				pru_rpmsg_send(&transport, dst, src, payload, len);
+
+				memset(payload,'\n',strlen(payload));
+				pru_rpmsg_send(&transport, dst, src, payload, len);
+
+				int d_mm4 = measure_distance_mm(TRIG4_BIT, ECHO4_BIT);
+                itoa(d_mm4, payload, 10);
+				pru_rpmsg_send(&transport, dst, src, payload, len);
+
 				memset(payload,'\n',strlen(payload));
 				pru_rpmsg_send(&transport, dst, src, payload, len);
 			}
