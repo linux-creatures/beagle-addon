@@ -25,7 +25,7 @@
 #include <pru_virtqueue.h>
 #include <pru_rpmsg.h>
 #include <sys_mailbox.h>
-#include "resource_table_1.h"
+#include "resource_table_0.h"
 
 
 /* Host-1 Interrupt sets bit 31 in register R31 */
@@ -35,13 +35,13 @@
  * PRU0 uses system event 16 (To ARM) and 17 (From ARM)
  * PRU1 uses system event 18 (To ARM) and 19 (From ARM)
  */
-#define TO_ARM_HOST			18
-#define FROM_ARM_HOST			19
+#define TO_ARM_HOST			16
+#define FROM_ARM_HOST			17
 
 #define CHAN_NAME					"rpmsg-pru"
 
-#define CHAN_DESC					"Channel 31"
-#define CHAN_PORT					31
+#define CHAN_DESC					"Channel 30"
+#define CHAN_PORT					30
 
 /*
  * Used to make sure the Linux drivers are ready for RPMsg communication
@@ -58,14 +58,12 @@ volatile register uint32_t __R31;
 #define TRIG_PULSE_US		10
 
 
-#define TRIG1_BIT               2
-#define ECHO1_BIT               3
-#define TRIG2_BIT               0
-#define ECHO2_BIT               1
-#define TRIG3_BIT               8
-#define ECHO3_BIT               10
-#define TRIG4_BIT               9
-#define ECHO4_BIT               11
+#define TRIG3_BIT               3
+#define ECHO3_BIT               5
+#define TRIG4_BIT               2
+#define ECHO4_BIT               0
+
+
 
 
 /* A utility function to reverse a string  */
@@ -117,7 +115,6 @@ char* itoa(int num, char* str, int base)
     // If number is negative, append '-'
     if (isNegative)
         str[i++] = '-';
-    str[i++]
  
     str[i] = '\0'; // Append string terminator
  
@@ -142,36 +139,36 @@ int hc_sr04_measure_pulse(int TRIG_BIT, int ECHO_BIT)
 	__R30 = 0u << TRIG_BIT;
 
 	/* Enable counter */
-	PRU1_CTRL.CYCLE = 0;
-	PRU1_CTRL.CTRL_bit.CTR_EN = 1;
+	PRU0_CTRL.CYCLE = 0;
+	PRU0_CTRL.CTRL_bit.CTR_EN = 1;
 
 	/* wait for ECHO to get high */
 	do {
 		echo = !!(__R31 & (1u << ECHO_BIT));
-		timeout = PRU1_CTRL.CYCLE > PRU_OCP_RATE_HZ;
+		timeout = PRU0_CTRL.CYCLE > PRU_OCP_RATE_HZ;
 	} while (!echo && !timeout);
 
-	PRU1_CTRL.CTRL_bit.CTR_EN = 0;
+	PRU0_CTRL.CTRL_bit.CTR_EN = 0;
 
 	if (timeout)
 		return -1;
 
 	/* Restart the counter */
-	PRU1_CTRL.CYCLE = 0;
-	PRU1_CTRL.CTRL_bit.CTR_EN = 1;
+	PRU0_CTRL.CYCLE = 0;
+	PRU0_CTRL.CTRL_bit.CTR_EN = 1;
 
 	/* measure the "high" pulse length */
 	do {
 		echo = !!(__R31 & (1u << ECHO_BIT));
-		timeout = PRU1_CTRL.CYCLE > PRU_OCP_RATE_HZ;
+		timeout = PRU0_CTRL.CYCLE > PRU_OCP_RATE_HZ;
 	} while (echo && !timeout);
 
-	PRU1_CTRL.CTRL_bit.CTR_EN = 0;
+	PRU0_CTRL.CTRL_bit.CTR_EN = 0;
 
 	if (timeout)
 		return -1;
 
-	uint64_t cycles = PRU1_CTRL.CYCLE;
+	uint64_t cycles = PRU0_CTRL.CYCLE;
 
 	return cycles / ((uint64_t)PRU_OCP_RATE_HZ / 1000000);
 }
@@ -231,31 +228,20 @@ void main(void)
 			if (pru_rpmsg_receive(&transport, &src, &dst, payload, &len) == PRU_RPMSG_SUCCESS) {
 				/* Echo the message back to the same address from which we just received */
 				while(1){
-				int d_mm1 = measure_distance_mm(TRIG1_BIT, ECHO1_BIT);				
+				int d_mm1 = measure_distance_mm(TRIG3_BIT, ECHO3_BIT);
+				
+				/* there is no room in IRAM for iprintf */
                 itoa(d_mm1, payload, 10);
-				pru_rpmsg_send(&transport, dst, src, payload, len);
 
+				pru_rpmsg_send(&transport, dst, src, payload, len);
 				memset(payload,'\n',strlen(payload));
-				pru_rpmsg_send(&transport, dst, src, payload, len);
 
-				int d_mm2 = measure_distance_mm(TRIG2_BIT, ECHO2_BIT);
+				pru_rpmsg_send(&transport, dst, src, payload, len);
+				int d_mm2 = measure_distance_mm(TRIG4_BIT, ECHO4_BIT);
+				
                 itoa(d_mm2, payload, 10);
-				pru_rpmsg_send(&transport, dst, src, payload, len);
 
-				memset(payload,'\n',strlen(payload));
 				pru_rpmsg_send(&transport, dst, src, payload, len);
-
-				int d_mm3 = measure_distance_mm(TRIG3_BIT, ECHO3_BIT);
-                itoa(d_mm3, payload, 10);
-				pru_rpmsg_send(&transport, dst, src, payload, len);
-
-				memset(payload,'\n',strlen(payload));
-				pru_rpmsg_send(&transport, dst, src, payload, len);
-
-				int d_mm4 = measure_distance_mm(TRIG4_BIT, ECHO4_BIT);
-                itoa(d_mm4, payload, 10);
-				pru_rpmsg_send(&transport, dst, src, payload, len);
-
 				memset(payload,'\n',strlen(payload));
 				pru_rpmsg_send(&transport, dst, src, payload, len);
 			}
@@ -263,3 +249,4 @@ void main(void)
 		}
 	}
 }
+
