@@ -62,10 +62,6 @@ volatile register uint32_t __R31;
 #define ECHO1_BIT               3
 #define TRIG2_BIT               0
 #define ECHO2_BIT               1
-#define TRIG3_BIT               8
-#define ECHO3_BIT               10
-#define TRIG4_BIT               9
-#define ECHO4_BIT               11
 
 
 /* A utility function to reverse a string  */
@@ -117,7 +113,6 @@ char* itoa(int num, char* str, int base)
     // If number is negative, append '-'
     if (isNegative)
         str[i++] = '-';
-    str[i++]
  
     str[i] = '\0'; // Append string terminator
  
@@ -232,32 +227,19 @@ void main(void)
 				/* Echo the message back to the same address from which we just received */
 				while(1){
 				int d_mm1 = measure_distance_mm(TRIG1_BIT, ECHO1_BIT);				
-                itoa(d_mm1, payload, 10);
+               			itoa(d_mm1, payload, 10);
 				pru_rpmsg_send(&transport, dst, src, payload, len);
 
-				memset(payload,'\n',strlen(payload));
-				pru_rpmsg_send(&transport, dst, src, payload, len);
+				//memset(payload,'\n',strlen(payload));
+				//pru_rpmsg_send(&transport, dst, src, payload, len);
 
 				int d_mm2 = measure_distance_mm(TRIG2_BIT, ECHO2_BIT);
                 itoa(d_mm2, payload, 10);
 				pru_rpmsg_send(&transport, dst, src, payload, len);
 
-				memset(payload,'\n',strlen(payload));
-				pru_rpmsg_send(&transport, dst, src, payload, len);
+				//memset(payload,'\n',strlen(payload));
+				//pru_rpmsg_send(&transport, dst, src, payload, len);
 
-				int d_mm3 = measure_distance_mm(TRIG3_BIT, ECHO3_BIT);
-                itoa(d_mm3, payload, 10);
-				pru_rpmsg_send(&transport, dst, src, payload, len);
-
-				memset(payload,'\n',strlen(payload));
-				pru_rpmsg_send(&transport, dst, src, payload, len);
-
-				int d_mm4 = measure_distance_mm(TRIG4_BIT, ECHO4_BIT);
-                itoa(d_mm4, payload, 10);
-				pru_rpmsg_send(&transport, dst, src, payload, len);
-
-				memset(payload,'\n',strlen(payload));
-				pru_rpmsg_send(&transport, dst, src, payload, len);
 			}
 			}
 		}
