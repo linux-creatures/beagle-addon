@@ -49,7 +49,7 @@
  */
 #define VIRTIO_CONFIG_S_DRIVER_OK	4
 
-char payload[RPMSG_BUF_SIZE];
+char payload[RPMSG_BUF_SIZE/64];
 volatile register uint32_t __R30;
 volatile register uint32_t __R31;
 

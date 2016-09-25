@@ -49,7 +49,7 @@
  */
 #define VIRTIO_CONFIG_S_DRIVER_OK	4
 
-char payload[RPMSG_BUF_SIZE];
+char payload[RPMSG_BUF_SIZE/64];
 volatile register uint32_t __R30;
 volatile register uint32_t __R31;
 
@@ -237,13 +237,13 @@ void main(void)
 				memset(payload,'\n',strlen(payload));
 
 				pru_rpmsg_send(&transport, dst, src, payload, len);
-				int d_mm2 = measure_distance_mm(TRIG4_BIT, ECHO4_BIT);
+				/*int d_mm2 = measure_distance_mm(TRIG4_BIT, ECHO4_BIT);
 				
                 itoa(d_mm2, payload, 10);
 
 				pru_rpmsg_send(&transport, dst, src, payload, len);
 				memset(payload,'\n',strlen(payload));
-				pru_rpmsg_send(&transport, dst, src, payload, len);
+				pru_rpmsg_send(&transport, dst, src, payload, len);*/
 			}
 			}
 		}
