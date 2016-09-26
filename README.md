@@ -44,3 +44,20 @@ To see the range measurement result in millimeters:
  * Sensor idea and DTS from https://github.com/HudsonWerks/Range-Sensor-PRU
  * Remoteproc/RPMsg code from git://git.ti.com/pru-software-support-package/pru-software-support-package.git
 
+
+Left
+8.27 out 8 r30
+8.28 in 10 r31
+
+
+Right
+8.29 out 9 r30
+8.30 in 11 r31
+
+Front
+8.43 out 2 r30
+8.44 in  3 r31
+
+Back
+8.45 out 0 r30
+8.46 in  1 r1
