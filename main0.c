@@ -174,10 +174,11 @@ int hc_sr04_measure_pulse(int TRIG_BIT, int ECHO_BIT)
 }
 
 
-static int measure_distance_mm(int TRIG_BIT, int ECHO_BIT)
+static int measure_distance_mm()
 {
-	int t_us = hc_sr04_measure_pulse(TRIG_BIT, ECHO_BIT);
-	int d_mm;
+	int d_mm3, d_mm4;
+	int t_us = hc_sr04_measure_pulse(int TRIG3_BIT, int ECHO3_BIT);
+	itoa(d_mm2, payload, 10);	
 
 	/*
 	 * Print the distance received from the sonar
