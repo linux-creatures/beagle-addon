@@ -1,0 +1,105 @@
+/*
+ * Device Tree Overlay for Robotics Cape SD-101D
+ * Strawson Design 2015
+ *
+ */
+ 
+/*
+pinmux control byte map courtesy of http://beaglebone.cameon.net/
+Bit 5: 1 - Input, 0 - Output
+Bit 4: 1 - Pull up, 0 - Pull down
+Bit 3: 1 - Pull disabled, 0 - Pull enabled
+Bit 2 \
+Bit 1 |- Mode
+Bit 0 /
+ */
+ 
+/dts-v1/;
+/plugin/; 
+
+/ {
+    compatible = "ti,beaglebone-black";
+
+    /* identification */
+    part-number = "US_PRU";
+
+    /* version */
+    version = "00A0";
+	
+	exclusive-use =
+
+		"P8.43",	/*TRIG1*/
+		"P8.45",	/*TRIG2*/
+		"P9.28",	/*TRIG3*/
+		"P9.30",	/*TRIG4*/
+		"P8.44",	/*ECHO1*/
+		"P8.46",	/*ECHO2*/
+		"P9.27",	/*ECHO3*/
+		"P9.31",	/*ECHO4*/
+		
+		"pruss",
+		"pru0",
+		"pru1";
+	
+		
+
+
+
+	
+fragment@0 {
+	target = <&am33xx_pinmux>;
+	__overlay__ {
+		/****************************************
+		* 			pinmux helper				
+		****************************************/
+		mux_helper_pins: pins {
+			pinctrl-single,pins = <
+
+			/* PRU Servo output */
+			0x0a8 0x25	/*pru1_pru_r30_2, MODE5*/
+			0x0ac 0x25	/*pru1_pru_r30_0, MODE5*/
+			0x19c 0x25	/*pru0_pru_r30_3, MODE5*/
+			0x198 0x25	/*pru0_pru_r30_2, MODE5*/
+			0x0ac 0x36	/*pru1_pru_r31_3, MODE6*/
+			0x0a4 0x36	/*pru1_pru_r31_1, MODE6*/
+			0x1a4 0x36	/*pru0_pru_r31_5, MODE6*/
+			0x190 0x36	/*pru0_pru_r31_0, MODE6*/
+			
+	
+			>;
+		};
+			
+			
+	};
+};
+	
+/****************************************
+	Pinmux Helper
+	activates the pinmux helper list of pin modes
+****************************************/
+fragment@1 {
+	target = <&ocp>;
+		__overlay__ {
+			test_helper: helper {
+			compatible = "bone-pinmux-helper";
+			pinctrl-names = "default";
+			pinctrl-0 = <&mux_helper_pins>;
+			status = "okay";
+		};
+	};
+};
+
+	
+
+/****************************************
+ 		PRU			
+****************************************/	
+fragment@2 {
+	target = <&pruss>;
+	__overlay__ {
+		status = "okay";
+	};
+};
+
+	
+};
