@@ -1,7 +1,7 @@
 #!/bin/bash
 
-OVERLAY="RoboticsCape-00A0"
-CAPENAME="RoboticsCape"
+OVERLAY="US_PRU-00A0"
+CAPENAME="US_PRU"
 
 echo "Installing Device Tree Overlay"
 
