@@ -1,12 +1,22 @@
 /**Code for timestamping**/
-
-
+#include <iostream>
+#include <fstream>
 #include <stdio.h>      // for sprintf()
 #include <iostream>     // for console output
 #include <string>       // for std::string
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 
+#define LOGNAME_FORMAT "/home/debian/log/"
+#define LOGNAME_SIZE 20
+
+FILE *logfile(void)
+{
+    static char name[LOGNAME_SIZE];
+    time_t now = now_str();
+    strftime(name, sizeof(name), LOGNAME_FORMAT, localtime(&now));
+    return fopen(name, "ab");
+}
 //-----------------------------------------------------------------------------
 // Format current time (calculated as an offset in current day) in this form:
 //
@@ -57,7 +67,12 @@ std::string now_str()
 
 int main()
 {
-    while(1){
-    std::cout << now_str() << '\n';
-}
+        FILE *file = logfile();
+        std::ofstream csv_file;
+      csv_file.open(now_str+"logstart.csv");
+      while(1){
+        csv_file << "Timestamp, Front, Back, Left, Right\n";
+        csv_file << now_str()+","+get_sensor("front")+","+get_sensor("back")+","+get_sensor("left")+","+get_sensor("right")+"\n";
+      }
+      csv_file.close();
 }
