@@ -5,18 +5,19 @@
 #include <iostream>     // for console output
 #include <string>       // for std::string
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <time.h>
 
-
-#define LOGNAME_FORMAT "/home/debian/log/"
+#define LOGNAME_FORMAT "log/%Y%m%d_%H%M%S"
 #define LOGNAME_SIZE 20
 
 FILE *logfile(void)
 {
     static char name[LOGNAME_SIZE];
-    time_t now = now_str();
+    time_t now = time(0);
     strftime(name, sizeof(name), LOGNAME_FORMAT, localtime(&now));
     return fopen(name, "ab");
 }
+
 //-----------------------------------------------------------------------------
 // Format current time (calculated as an offset in current day) in this form:
 //
@@ -65,7 +66,6 @@ std::string now_str()
     return buf;
 }
 
-
 std::string get_sensor(std::string sensor)
 {
     // Get current time from the clock, using microseconds resolution
@@ -89,10 +89,11 @@ std::string get_sensor(std::string sensor)
 int main()
 {
         FILE *csv_file = logfile();
-      csv_file.open(now_str+"logstart.csv");
+      //csv_file.open(now_str+"logstart.csv");
       while(1){
-        csv_file << "Timestamp, Front, Back, Left, Right\n";
-        csv_file << now_str()+","+get_sensor("front")+","+get_sensor("back")+","+get_sensor("left")+","+get_sensor("right")+"\n";
+        fprintf(csv_file, "Timestamp, Front, Back, Left, Right\n)";
+        fprintf(now_str()+","+get_sensor("front")+","+get_sensor("back")+","+get_sensor("left")+","+get_sensor("right")+"\n";
+        fprintf(strcat(get_sensor("right")+"\n));
       }
       fclose(csv_file);
 }

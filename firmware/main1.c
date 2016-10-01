@@ -72,16 +72,16 @@ void reverse(char str[], int length)
     int end = length -1;
     while (start < end)
     {
-	temp = str[start];
-	str[start] = str[end];
-	str[end] = temp;
-        start++;
-        end--;
+		temp = str[start];
+		str[start] = str[end];
+		str[end] = temp;
+	    start++;
+	    end--;
     }
 }
  
 // Implementation of itoa()
-char* itoa(int num, char* str, int base)
+char* itoa(int num1, int num2, char* str, int base)
 {
     int i = 0;
     bool isNegative = false;
@@ -172,10 +172,10 @@ int hc_sr04_measure_pulse(int TRIG_BIT, int ECHO_BIT)
 }
 
 
-static int measure_distance_mm(int TRIG_BIT, int ECHO_BIT)
+static int measure_distance_mm(char* str)
 {
-	int t_us = hc_sr04_measure_pulse(TRIG_BIT, ECHO_BIT);
-	int d_mm;
+	int t_us = hc_sr04_measure_pulse(TRIG1_BIT, ECHO1_BIT);
+	int d_mm1, d_mm2;
 
 	/*
 	 * Print the distance received from the sonar
@@ -183,11 +183,22 @@ static int measure_distance_mm(int TRIG_BIT, int ECHO_BIT)
 	 * so it takes 2.912 us to make 1 mm, i.e. 5.844 us for a
 	 * roundtrip of 1 mm.
 	 */
-	d_mm = (t_us * 1000) / 5844;
+	d_mm1 = (t_us * 1000) / 5844;
 	if (t_us < 0)
-		d_mm = -1;
+		d_mm1 = -1;
 
-	return d_mm;
+	t_us = hc_sr04_measure_pulse(TRIG2_BIT, ECHO1_BIT);
+	d_mm2 = (t_us * 1000) / 5844;
+	if (t_us < 0)
+		d_mm2 = -1;
+
+	int ret = itoa(d_mm1, d_mm2, str, 10);
+
+	if (ret == 0)
+		return ret;
+	else{
+		return -1;
+	}
 }
 
 
@@ -197,7 +208,7 @@ static int measure_distance_mm(int TRIG_BIT, int ECHO_BIT)
 void main(void)
 {
 	struct pru_rpmsg_transport transport;
-	uint16_t src, dst, len;
+	uint16_t src, dst, len, ret;
 	volatile uint8_t *status;
 
 	/* allow OCP master port access by the PRU so the PRU can read external memories */
@@ -226,19 +237,8 @@ void main(void)
 			if (pru_rpmsg_receive(&transport, &src, &dst, payload, &len) == PRU_RPMSG_SUCCESS) {
 				/* Echo the message back to the same address from which we just received */
 				while(1){
-				int d_mm1 = measure_distance_mm(TRIG1_BIT, ECHO1_BIT);				
-               			itoa(d_mm1, payload, 10);
+				ret = measure_distance_mm(payload);
 				pru_rpmsg_send(&transport, dst, src, payload, len);
-
-				//memset(payload,'\n',strlen(payload));
-				//pru_rpmsg_send(&transport, dst, src, payload, len);
-
-				int d_mm2 = measure_distance_mm(TRIG2_BIT, ECHO2_BIT);
-                itoa(d_mm2, payload, 10);
-				pru_rpmsg_send(&transport, dst, src, payload, len);
-
-				//memset(payload,'\n',strlen(payload));
-				//pru_rpmsg_send(&transport, dst, src, payload, len);
 
 			}
 			}
